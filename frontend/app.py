@@ -97,9 +97,6 @@ with col1:
             st.warning("Please paste or upload code first")
             st.stop()
 
-        # SAFE REVIEW EXTRACTION
-        review = data.get("review", {});
-
         #  CRITICAL SAFETY CHECKS
         if isinstance(review, str):
             st.error(" Backend returned invalid string format")
