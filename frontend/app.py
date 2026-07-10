@@ -276,10 +276,7 @@ def detect_language(code: str, filename: str = "") -> str:
         if filename.endswith(ext):
             return lang
     hints = {
-        "def ": "Python", "import ": "Python",
-        "function ": "JavaScript", "const ": "JavaScript",
-        "public class": "Java", "#include": "C++",
-        "SELECT ": "SQL", "<html": "HTML",
+        
     }
     for hint, lang in hints.items():
         if hint in code[:500]:
