@@ -18,8 +18,6 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap');
-
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
