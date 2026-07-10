@@ -99,19 +99,6 @@ with col1:
 
         with st.spinner("AI is analyzing your code..."):
 
-            try:
-                res = requests.post(
-                    f"{API_URL}/review",
-                    json={"code": final_code},
-                    timeout=90
-                )
-
-                data = res.json()
-
-            except Exception as e:
-                st.error(f"API Error: {e}")
-                st.stop()
-
         # SAFE REVIEW EXTRACTION
         review = data.get("review", {})
 
