@@ -97,8 +97,6 @@ with col1:
             st.warning("Please paste or upload code first")
             st.stop()
 
-        with st.spinner("AI is analyzing your code..."):
-
         # SAFE REVIEW EXTRACTION
         review = data.get("review", {})
 
