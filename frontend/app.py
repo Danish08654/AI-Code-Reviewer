@@ -20,19 +20,6 @@ st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap');
 
-:root {
-    --bg-primary:    #0d1117;
-    --bg-secondary:  #161b22;
-    --bg-card:       #1c2230;
-    --border:        #30363d;
-    --accent-blue:   #58a6ff;
-    --accent-green:  #3fb950;
-    --accent-yellow: #d29922;
-    --accent-red:    #f85149;
-    --accent-purple: #bc8cff;
-    --text-primary:  #e6edf3;
-    --text-muted:    #8b949e;
-}
 
 html, body, [class*="css"] {
     font-family: 'Inter', sans-serif;
