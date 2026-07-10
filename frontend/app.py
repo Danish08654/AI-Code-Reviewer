@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 
-API_URL = "http://localhost:8000"
 
 # PAGE CONFIG
 st.set_page_config(
