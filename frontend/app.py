@@ -5,9 +5,8 @@ import io
 from datetime import datetime
 from groq import Groq
 
-# ─────────────────────────────────────────────
 # PAGE CONFIG
-# ─────────────────────────────────────────────
+
 st.set_page_config(
     page_title="AI Code Reviewer",
     page_icon="🤖",
@@ -15,9 +14,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ─────────────────────────────────────────────
 # CUSTOM CSS
-# ─────────────────────────────────────────────
+
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -272,15 +270,14 @@ hr { border-color: var(--border) !important; }
 """, unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────
 # HELPERS
-# ─────────────────────────────────────────────
+
 def get_groq_client():
     try:
         api_key = st.secrets["GROQ_API_KEY"]
         return Groq(api_key=api_key)
     except Exception:
-        st.error("⚠️  GROQ_API_KEY not found in Streamlit secrets. Add it under Settings → Secrets.")
+        st.error(" GROQ_API_KEY not found in Streamlit secrets. Add it under Settings → Secrets.")
         st.stop()
 
 
@@ -438,21 +435,18 @@ def render_issue_list(items: list, cls: str, empty_msg: str = "None found ✓"):
         st.markdown(f'<div class="issue-item {cls}">{item}</div>', unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────
 # SIDEBAR
-# ─────────────────────────────────────────────
+
 with st.sidebar:
     st.markdown('<div style="padding: 8px 0 16px;">', unsafe_allow_html=True)
     st.markdown("## ⚙️ Settings")
     st.markdown("---")
 
     model_choice = st.selectbox(
-        "🤖 LLM Model",
+        " LLM Model",
         options=[
             "llama-3.3-70b-versatile",
             "llama-3.1-8b-instant",
-            "mixtral-8x7b-32768",
-            "gemma2-9b-it",
         ],
         index=0,
         help="Larger models give more thorough reviews"
@@ -466,10 +460,9 @@ with st.sidebar:
     check_practices  = st.checkbox("Best Practices",        value=True)
 
     st.markdown("---")
-    st.markdown("### ℹ️ About")
+    st.markdown("###  About")
     st.markdown("""
     <div style="font-size:0.82rem; color:#8b949e; line-height:1.6;">
-    Powered by <strong style="color:#58a6ff;">Groq</strong> for ultra-fast inference.<br><br>
     Supports: Python · JS · TS · Java · C++ · C · Go · Rust · Ruby · PHP · HTML · CSS · SQL
     </div>
     """, unsafe_allow_html=True)
@@ -477,20 +470,15 @@ with st.sidebar:
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────
 # HEADER BANNER
-# ─────────────────────────────────────────────
 st.markdown("""
 <div class="banner">
-    <h1>🤖 AI Code Reviewer</h1>
-    <p>Instant bug detection · Security auditing · Performance analysis · Code quality scoring</p>
+    <h1> AI Code Reviewer</h1>
 </div>
 """, unsafe_allow_html=True)
 
 
-# ─────────────────────────────────────────────
 # MAIN LAYOUT
-# ─────────────────────────────────────────────
 left_col, right_col = st.columns([5, 4], gap="large")
 
 with left_col:
@@ -546,23 +534,21 @@ with left_col:
         """, unsafe_allow_html=True)
 
     st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)
-    analyze_btn = st.button("🔍  Analyze Code", use_container_width=True)
+    analyze_btn = st.button("  Analyze Code", use_container_width=True)
 
 
-# ─────────────────────────────────────────────
 # ANALYSIS
-# ─────────────────────────────────────────────
 if analyze_btn:
     if not final_code:
         with left_col:
-            st.warning("⚠️  Please paste or upload some code first.")
+            st.warning("  Please paste or upload some code first.")
         st.stop()
 
     client   = get_groq_client()
     language = detect_language(final_code, file_name)
 
     with left_col:
-        with st.spinner("🤖  Analyzing your code with Groq…"):
+        with st.spinner("  Analyzing your code with Groq…"):
             t0 = time.time()
             try:
                 review = analyze_code(client, final_code, language, model_choice)
@@ -585,9 +571,8 @@ if analyze_btn:
     st.session_state["language"] = language
     st.session_state["elapsed"]  = elapsed
 
-# ─────────────────────────────────────────────
 # RESULTS PANEL
-# ─────────────────────────────────────────────
+
 if "review" in st.session_state:
     review   = st.session_state["review"]
     code     = st.session_state["code"]
