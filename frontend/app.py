@@ -5,16 +5,12 @@ import io
 from datetime import datetime
 from groq import Groq
 
-# PAGE CONFIG
-
 st.set_page_config(
     page_title="AI Code Reviewer",
     page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
-
-# CUSTOM CSS
 
 st.markdown("""
 <style>
@@ -34,15 +30,40 @@ st.markdown("""
     --text-muted:    #8b949e;
 }
 
-html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
+/* ── Nuclear background override ── */
+html,
+body,
+[class*="css"],
+.stApp,
+.stApp > div,
+.stApp > div > div,
+.stApp > div > div > div,
+div[data-testid="stAppViewContainer"],
+div[data-testid="stAppViewContainer"] > div,
+div[data-testid="block-container"],
+div[data-testid="stVerticalBlock"],
+section[data-testid="stMain"],
+section[data-testid="stMain"] > div {
+    background-color: #0d1117 !important;
+    color: #e6edf3 !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
-.stApp { background-color: var(--bg-primary); }
+/* White patch fix - sometimes Streamlit injects a white layer */
+div[data-testid="stAppViewContainer"] {
+    background-color: #0d1117 !important;
+}
+div[data-testid="stHeader"] {
+    background-color: #0d1117 !important;
+}
+div[data-testid="stToolbar"] {
+    background-color: #0d1117 !important;
+}
+div.block-container {
+    background-color: #0d1117 !important;
+    padding-top: 1.5rem !important;
+}
 
-/* Hide default Streamlit chrome */
 #MainMenu, footer, header { visibility: hidden; }
 
 /* ── Top banner ── */
@@ -75,30 +96,6 @@ html, body, [class*="css"] {
     margin: 0;
 }
 
-/* ── Metric pills ── */
-.metrics-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
-.metric-pill {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 20px;
-    flex: 1;
-    min-width: 110px;
-}
-.metric-pill .val {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--accent-blue);
-    font-family: 'JetBrains Mono', monospace;
-}
-.metric-pill .lbl {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 2px;
-}
-
 /* ── Cards ── */
 .card {
     background: var(--bg-card);
@@ -127,6 +124,7 @@ html, body, [class*="css"] {
     font-size: 0.88rem;
     border-left: 3px solid transparent;
     line-height: 1.55;
+    color: var(--text-primary);
 }
 .issue-critical { border-left-color: var(--accent-red); }
 .issue-medium   { border-left-color: var(--accent-yellow); }
@@ -141,143 +139,167 @@ html, body, [class*="css"] {
     font-weight: 600;
     letter-spacing: 0.05em;
 }
-.badge-red    { background: rgba(248,81,73,0.15); color: var(--accent-red);    border: 1px solid rgba(248,81,73,0.3); }
+.badge-red    { background: rgba(248,81,73,0.15);  color: var(--accent-red);    border: 1px solid rgba(248,81,73,0.3); }
 .badge-yellow { background: rgba(210,153,34,0.15); color: var(--accent-yellow); border: 1px solid rgba(210,153,34,0.3); }
-.badge-green  { background: rgba(63,185,80,0.15); color: var(--accent-green);  border: 1px solid rgba(63,185,80,0.3); }
-.badge-blue   { background: rgba(88,166,255,0.15); color: var(--accent-blue);  border: 1px solid rgba(88,166,255,0.3); }
+.badge-green  { background: rgba(63,185,80,0.15);  color: var(--accent-green);  border: 1px solid rgba(63,185,80,0.3); }
+.badge-blue   { background: rgba(88,166,255,0.15); color: var(--accent-blue);   border: 1px solid rgba(88,166,255,0.3); }
 
-/* ── Verdict banner ── */
+/* ── Verdict banners ── */
 .verdict-approve {
     background: linear-gradient(135deg, rgba(63,185,80,0.15), rgba(63,185,80,0.05));
     border: 1px solid rgba(63,185,80,0.4);
-    border-radius: 12px;
-    padding: 20px 24px;
-    text-align: center;
+    border-radius: 12px; padding: 20px 24px; text-align: center;
 }
 .verdict-reject {
     background: linear-gradient(135deg, rgba(248,81,73,0.15), rgba(248,81,73,0.05));
     border: 1px solid rgba(248,81,73,0.4);
-    border-radius: 12px;
-    padding: 20px 24px;
-    text-align: center;
+    border-radius: 12px; padding: 20px 24px; text-align: center;
 }
 .verdict-review {
     background: linear-gradient(135deg, rgba(210,153,34,0.15), rgba(210,153,34,0.05));
     border: 1px solid rgba(210,153,34,0.4);
-    border-radius: 12px;
-    padding: 20px 24px;
-    text-align: center;
+    border-radius: 12px; padding: 20px 24px; text-align: center;
 }
 .verdict-text { font-size: 1.3rem; font-weight: 700; margin: 0; }
 
-/* ── Score ring ── */
-.score-circle {
-    width: 90px; height: 90px;
-    border-radius: 50%;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    font-family: 'JetBrains Mono', monospace;
-    margin: 0 auto 12px;
-}
-
-/* ── Sidebar tweaks ── */
-section[data-testid="stSidebar"] {
-    background-color: var(--bg-secondary);
-    border-right: 1px solid var(--border);
+/* ── Sidebar ── */
+section[data-testid="stSidebar"],
+section[data-testid="stSidebar"] > div,
+section[data-testid="stSidebar"] > div > div {
+    background-color: #161b22 !important;
+    border-right: 1px solid #30363d !important;
 }
 section[data-testid="stSidebar"] .stSelectbox label,
 section[data-testid="stSidebar"] p,
-section[data-testid="stSidebar"] li { color: var(--text-primary) !important; }
+section[data-testid="stSidebar"] li,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] label {
+    color: var(--text-primary) !important;
+}
 
 /* ── Buttons ── */
 .stButton > button {
-    background: linear-gradient(135deg, #1f6feb, #388bfd);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.92rem;
-    padding: 10px 20px;
-    transition: all 0.2s;
-    width: 100%;
+    background: linear-gradient(135deg, #1f6feb, #388bfd) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+    padding: 10px 20px !important;
+    transition: all 0.2s !important;
+    width: 100% !important;
 }
 .stButton > button:hover {
-    background: linear-gradient(135deg, #388bfd, #58a6ff);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 15px rgba(88,166,255,0.3);
+    background: linear-gradient(135deg, #388bfd, #58a6ff) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 15px rgba(88,166,255,0.3) !important;
 }
 
 /* ── Text area ── */
 .stTextArea textarea {
-    background-color: var(--bg-secondary) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border) !important;
+    background-color: #161b22 !important;
+    color: #e6edf3 !important;
+    border: 1px solid #30363d !important;
     border-radius: 8px !important;
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 0.85rem !important;
 }
 .stTextArea textarea:focus {
-    border-color: var(--accent-blue) !important;
+    border-color: #58a6ff !important;
     box-shadow: 0 0 0 2px rgba(88,166,255,0.2) !important;
+}
+.stTextArea label {
+    color: #8b949e !important;
 }
 
 /* ── File uploader ── */
 .stFileUploader {
-    background: var(--bg-secondary);
-    border: 1px dashed var(--border);
-    border-radius: 10px;
-    padding: 8px;
+    background: #161b22 !important;
+    border: 1px dashed #30363d !important;
+    border-radius: 10px !important;
 }
-.stFileUploader label { color: var(--text-muted) !important; }
-
-/* ── Progress / spinner ── */
-.stSpinner > div { border-top-color: var(--accent-blue) !important; }
+.stFileUploader label,
+.stFileUploader p,
+.stFileUploader span {
+    color: #8b949e !important;
+}
+[data-testid="stFileUploadDropzone"] {
+    background-color: #161b22 !important;
+    border-color: #30363d !important;
+}
 
 /* ── Download button ── */
 .stDownloadButton > button {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    color: var(--text-primary) !important;
-    border-radius: 8px;
-    font-size: 0.85rem;
+    background: #1c2230 !important;
+    border: 1px solid #30363d !important;
+    color: #e6edf3 !important;
+    border-radius: 8px !important;
+    font-size: 0.85rem !important;
 }
 .stDownloadButton > button:hover {
-    border-color: var(--accent-blue) !important;
-    color: var(--accent-blue) !important;
+    border-color: #58a6ff !important;
+    color: #58a6ff !important;
 }
-
-/* ── Divider ── */
-hr { border-color: var(--border) !important; }
 
 /* ── Tabs ── */
 .stTabs [data-baseweb="tab-list"] {
-    background: var(--bg-secondary);
-    border-radius: 10px;
-    gap: 4px;
-    padding: 4px;
+    background: #161b22 !important;
+    border-radius: 10px !important;
+    gap: 4px !important;
+    padding: 4px !important;
 }
 .stTabs [data-baseweb="tab"] {
-    background: transparent;
-    color: var(--text-muted);
-    border-radius: 7px;
-    font-size: 0.85rem;
+    background: transparent !important;
+    color: #8b949e !important;
+    border-radius: 7px !important;
+    font-size: 0.85rem !important;
 }
 .stTabs [aria-selected="true"] {
-    background: var(--bg-card) !important;
-    color: var(--text-primary) !important;
+    background: #1c2230 !important;
+    color: #e6edf3 !important;
+}
+
+/* ── Selectbox & dropdowns ── */
+.stSelectbox > div > div {
+    background-color: #161b22 !important;
+    border-color: #30363d !important;
+    color: #e6edf3 !important;
+}
+.stSelectbox svg { fill: #8b949e !important; }
+
+/* ── Checkbox ── */
+.stCheckbox span { color: #e6edf3 !important; }
+
+/* ── Spinner ── */
+.stSpinner > div { border-top-color: #58a6ff !important; }
+
+/* ── Divider ── */
+hr { border-color: #30363d !important; }
+
+/* ── Alert/warning boxes ── */
+.stAlert {
+    background-color: #1c2230 !important;
+    border-color: #30363d !important;
+    color: #e6edf3 !important;
+}
+
+/* ── Code blocks ── */
+.stCode, pre, code {
+    background-color: #161b22 !important;
+    color: #e6edf3 !important;
 }
 </style>
 """, unsafe_allow_html=True)
 
 
-# HELPERS
+# ── HELPERS ──
 
 def get_groq_client():
     try:
         api_key = st.secrets["GROQ_API_KEY"]
         return Groq(api_key=api_key)
     except Exception:
-        st.error(" GROQ_API_KEY not found in Streamlit secrets. Add it under Settings → Secrets.")
+        st.error("⚠️  GROQ_API_KEY not found in Streamlit secrets. Add it under Settings → Secrets.")
         st.stop()
 
 
@@ -333,7 +355,7 @@ Rules:
 - medium_issues: bugs, logic errors, bad patterns
 - suggestions: style, readability, maintainability improvements
 - security_findings: XSS, SQLi, hardcoded secrets, unsafe deserialization, etc.
-- performance_findings: O(n²) loops, memory leaks, blocking calls, etc.
+- performance_findings: O(n2) loops, memory leaks, blocking calls, etc.
 - best_practices: idiomatic improvements and missing conventions
 - verdict: APPROVE if quality_score >= 75 and no critical_issues, REJECT if critical_issues exist or score < 40, else NEEDS REVIEW
 - Be concrete and actionable — reference line numbers or variable names where possible
@@ -345,7 +367,7 @@ Code to review ({language}):
 ```"""
 
 
-def analyze_code(client: Groq, code: str, language: str, model: str) -> dict:
+def analyze_code(client, code: str, language: str, model: str) -> dict:
     prompt = REVIEW_PROMPT.format(language=language, code=code[:8000])
     response = client.chat.completions.create(
         model=model,
@@ -354,7 +376,6 @@ def analyze_code(client: Groq, code: str, language: str, model: str) -> dict:
         max_tokens=2048,
     )
     raw = response.choices[0].message.content.strip()
-    # Strip any accidental markdown fences
     if raw.startswith("```"):
         raw = raw.split("```")[1]
         if raw.startswith("json"):
@@ -367,18 +388,18 @@ def analyze_code(client: Groq, code: str, language: str, model: str) -> dict:
 def build_report(review: dict, code: str, language: str) -> str:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     lines = [
-        f"# AI Code Review Report",
+        "# AI Code Review Report",
         f"Generated: {now}",
         f"Language: {language}  |  Lines: {count_lines(code)}",
         "",
-        f"## Summary",
+        "## Summary",
         review.get("summary", "N/A"),
         "",
-        f"## Scores",
-        f"- Quality:        {review.get('quality_score', 'N/A')}/100",
-        f"- Security:       {review.get('security_score', 'N/A')}/100",
-        f"- Performance:    {review.get('performance_score', 'N/A')}/100",
-        f"- Maintainability:{review.get('maintainability_score', 'N/A')}/100",
+        "## Scores",
+        f"- Quality:         {review.get('quality_score', 'N/A')}/100",
+        f"- Security:        {review.get('security_score', 'N/A')}/100",
+        f"- Performance:     {review.get('performance_score', 'N/A')}/100",
+        f"- Maintainability: {review.get('maintainability_score', 'N/A')}/100",
         "",
         f"## Verdict: {review.get('verdict', 'UNKNOWN')}",
         "",
@@ -411,14 +432,14 @@ def score_color(score: int) -> str:
 def render_score_ring(label: str, score: int):
     color = score_color(score)
     st.markdown(f"""
-    <div style="text-align:center; padding: 8px;">
+    <div style="text-align:center; padding:8px;">
         <div style="
             width:80px; height:80px; border-radius:50%;
             border: 3px solid {color};
             display:flex; flex-direction:column;
             align-items:center; justify-content:center;
             margin: 0 auto 8px;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.25);
         ">
             <span style="font-family:'JetBrains Mono',monospace; font-size:1.2rem; font-weight:700; color:{color};">{score}</span>
         </div>
@@ -435,18 +456,18 @@ def render_issue_list(items: list, cls: str, empty_msg: str = "None found ✓"):
         st.markdown(f'<div class="issue-item {cls}">{item}</div>', unsafe_allow_html=True)
 
 
-# SIDEBAR
-
+# ── SIDEBAR ──
 with st.sidebar:
-    st.markdown('<div style="padding: 8px 0 16px;">', unsafe_allow_html=True)
     st.markdown("## ⚙️ Settings")
     st.markdown("---")
 
     model_choice = st.selectbox(
-        " LLM Model",
+        "🤖 LLM Model",
         options=[
             "llama-3.3-70b-versatile",
             "llama-3.1-8b-instant",
+            "mixtral-8x7b-32768",
+            "gemma2-9b-it",
         ],
         index=0,
         help="Larger models give more thorough reviews"
@@ -454,35 +475,34 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("### 🔍 Review Scope")
-    check_security   = st.checkbox("Security Analysis",     value=True)
-    check_perf       = st.checkbox("Performance Analysis",  value=True)
-    check_quality    = st.checkbox("Code Quality",          value=True)
-    check_practices  = st.checkbox("Best Practices",        value=True)
+    st.checkbox("Security Analysis",    value=True)
+    st.checkbox("Performance Analysis", value=True)
+    st.checkbox("Code Quality",         value=True)
+    st.checkbox("Best Practices",       value=True)
 
     st.markdown("---")
-    st.markdown("###  About")
+    st.markdown("### ℹ️ About")
     st.markdown("""
-    <div style="font-size:0.82rem; color:#8b949e; line-height:1.6;">
+    <div style="font-size:0.82rem; color:#8b949e; line-height:1.7;">
+    Powered by <strong style="color:#58a6ff;">Groq</strong> for ultra-fast inference.<br><br>
     Supports: Python · JS · TS · Java · C++ · C · Go · Rust · Ruby · PHP · HTML · CSS · SQL
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("</div>", unsafe_allow_html=True)
 
-
-# HEADER BANNER
+# ── HEADER ──
 st.markdown("""
 <div class="banner">
-    <h1> AI Code Reviewer</h1>
+    <h1>🤖 AI Code Reviewer</h1>
+    <p>Instant bug detection · Security auditing · Performance analysis · Code quality scoring</p>
 </div>
 """, unsafe_allow_html=True)
 
 
-# MAIN LAYOUT
+# ── MAIN LAYOUT ──
 left_col, right_col = st.columns([5, 4], gap="large")
 
 with left_col:
-    # Input tabs
     tab_paste, tab_upload = st.tabs(["✏️  Paste Code", "📁  Upload File"])
 
     with tab_paste:
@@ -517,16 +537,14 @@ with left_col:
             except Exception as e:
                 st.error(f"Failed to read file: {e}")
 
-    # Merge inputs
     final_code = "\n\n".join(filter(None, [code_input, file_content])).strip()
 
-    # Quick stats bar
     if final_code:
         lang_detected = detect_language(final_code, file_name)
         n_lines = count_lines(final_code)
         n_chars = len(final_code)
         st.markdown(f"""
-        <div style="display:flex; gap:10px; margin: 10px 0; flex-wrap:wrap;">
+        <div style="display:flex; gap:10px; margin:10px 0; flex-wrap:wrap;">
             <span class="badge badge-blue">🔤 {lang_detected}</span>
             <span class="badge badge-blue">📝 {n_lines} lines</span>
             <span class="badge badge-blue">💾 {n_chars:,} chars</span>
@@ -534,21 +552,21 @@ with left_col:
         """, unsafe_allow_html=True)
 
     st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)
-    analyze_btn = st.button("  Analyze Code", use_container_width=True)
+    analyze_btn = st.button("🔍  Analyze Code", use_container_width=True)
 
 
-# ANALYSIS
+# ── ANALYSIS ──
 if analyze_btn:
     if not final_code:
         with left_col:
-            st.warning("  Please paste or upload some code first.")
+            st.warning("⚠️  Please paste or upload some code first.")
         st.stop()
 
     client   = get_groq_client()
     language = detect_language(final_code, file_name)
 
     with left_col:
-        with st.spinner("  Analyzing your code with Groq…"):
+        with st.spinner("🤖  Analyzing your code with Groq…"):
             t0 = time.time()
             try:
                 review = analyze_code(client, final_code, language, model_choice)
@@ -565,14 +583,13 @@ if analyze_btn:
             st.error("❌  Unexpected response format from AI.")
         st.stop()
 
-    # ── Store in session ──
     st.session_state["review"]   = review
     st.session_state["code"]     = final_code
     st.session_state["language"] = language
     st.session_state["elapsed"]  = elapsed
 
-# RESULTS PANEL
 
+# ── RESULTS ──
 if "review" in st.session_state:
     review   = st.session_state["review"]
     code     = st.session_state["code"]
@@ -580,35 +597,38 @@ if "review" in st.session_state:
     elapsed  = st.session_state["elapsed"]
 
     with right_col:
-        # ── Timing chip ──
-        st.markdown(f'<div style="text-align:right; margin-bottom:10px;"><span class="badge badge-green">⚡ {elapsed:.2f}s</span></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div style="text-align:right; margin-bottom:10px;">'
+            f'<span class="badge badge-green">⚡ {elapsed:.2f}s</span></div>',
+            unsafe_allow_html=True
+        )
 
-        # ── Verdict ──
         verdict = review.get("verdict", "UNKNOWN")
-        verdict_cls = {
+        v_map = {
             "APPROVE":      ("verdict-approve", "🟢", "#3fb950"),
             "NEEDS REVIEW": ("verdict-review",  "🟡", "#d29922"),
             "REJECT":       ("verdict-reject",  "🔴", "#f85149"),
-        }.get(verdict, ("verdict-review", "🟡", "#d29922"))
+        }
+        v_cls, v_icon, v_color = v_map.get(verdict, ("verdict-review", "🟡", "#d29922"))
 
         st.markdown(f"""
-        <div class="{verdict_cls[0]}">
-            <p class="verdict-text" style="color:{verdict_cls[2]};">{verdict_cls[1]} {verdict}</p>
+        <div class="{v_cls}">
+            <p class="verdict-text" style="color:{v_color};">{v_icon} {verdict}</p>
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)
 
-        # ── Score rings ──
+        # Score rings
         st.markdown('<div class="card"><div class="card-title" style="color:#8b949e;">📊 SCORES</div>', unsafe_allow_html=True)
         c1, c2, c3, c4 = st.columns(4)
-        with c1: render_score_ring("Quality",       review.get("quality_score", 0))
-        with c2: render_score_ring("Security",      review.get("security_score", 0))
-        with c3: render_score_ring("Performance",   review.get("performance_score", 0))
-        with c4: render_score_ring("Maintain.",     review.get("maintainability_score", 0))
+        with c1: render_score_ring("Quality",     review.get("quality_score", 0))
+        with c2: render_score_ring("Security",    review.get("security_score", 0))
+        with c3: render_score_ring("Performance", review.get("performance_score", 0))
+        with c4: render_score_ring("Maintain.",   review.get("maintainability_score", 0))
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # ── Summary ──
+        # Summary
         st.markdown(f"""
         <div class="card">
             <div class="card-title" style="color:#8b949e;">📝 SUMMARY</div>
@@ -616,7 +636,7 @@ if "review" in st.session_state:
         </div>
         """, unsafe_allow_html=True)
 
-        # ── Issues tabs ──
+        # Issue tabs
         t1, t2, t3, t4, t5 = st.tabs(["🔴 Critical", "🟡 Medium", "🔒 Security", "⚡ Perf", "💡 Tips"])
 
         with t1:
@@ -647,9 +667,9 @@ if "review" in st.session_state:
             st.markdown(f'<span class="badge badge-blue">{n} tip{"s" if n!=1 else ""}</span><br><br>', unsafe_allow_html=True)
             render_issue_list(all_tips, "issue-info", "Code follows best practices ✓")
 
-        # ── Download ──
+        # Download
         st.markdown("<div style='margin-top:16px;'></div>", unsafe_allow_html=True)
-        report_text = build_report(review, code, language)
+        report_text  = build_report(review, code, language)
         report_bytes = io.BytesIO(report_text.encode("utf-8"))
         fname = f"code_review_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
 
