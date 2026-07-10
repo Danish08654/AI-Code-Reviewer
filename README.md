@@ -1,6 +1,6 @@
 # AI Code Reviewer
 
-An AI-powered code review system that analyzes code for bugs, security issues, performance problems, and best practices using FastAPI + Groq Llama 3 + Streamlit UI.
+An AI-powered code review system that analyzes code for bugs, security issues, performance problems.
 
 ---
 
