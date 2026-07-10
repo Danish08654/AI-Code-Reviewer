@@ -98,7 +98,7 @@ with col1:
             st.stop()
 
         # SAFE REVIEW EXTRACTION
-        review = data.get("review", {})
+        review = data.get("review", {});
 
         #  CRITICAL SAFETY CHECKS
         if isinstance(review, str):
