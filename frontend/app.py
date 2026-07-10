@@ -128,7 +128,7 @@ with st.sidebar:
 
 # ── HEADER ──
 st.markdown('<div class="banner"><h1>🤖 AI Code Reviewer</h1>
-, unsafe_allow_html=True)
+unsafe_allow_html=True)
 
 left, right = st.columns([5, 4], gap="large")
 
