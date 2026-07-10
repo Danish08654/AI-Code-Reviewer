@@ -25,8 +25,6 @@ html, body, [class*="css"] {
     color: var(--text-primary);
 }
 
-.stApp { background-color: var(--bg-primary); }
-
 /* Hide default Streamlit chrome */
 #MainMenu, footer, header { visibility: hidden; }
 
