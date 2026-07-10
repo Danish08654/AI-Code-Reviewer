@@ -1,10 +1,12 @@
-AI Code Reviewer
+# AI Code Reviewer
 
 An AI-powered code review system that analyzes code for bugs, security issues, performance problems, and best practices using FastAPI + Groq Llama 3 + Streamlit UI.
 
+---
+
 # Features
 
-🔍 AI-powered code review
+ AI-powered code review
 
 🐞 Bug detection
 
@@ -19,7 +21,6 @@ An AI-powered code review system that analyzes code for bugs, security issues, p
 🧠 Structured JSON-based AI responses
 
 🎯 Clean and interactive Streamlit dashboard
-
 
 ---
 
@@ -63,11 +64,11 @@ Suggestions
 
 Final Verdict
 
-Example Output
+# Example Output
 
 Input: def add(a, b): return a + b
 
-Output:
+# Output:
 
 No critical issues
 
@@ -76,6 +77,9 @@ Suggests adding type hints
 Suggests validation for production use
 
 Verdict: NEEDS_CHANGES
+
+----
+
 
 # Future Improvements
 
@@ -100,9 +104,3 @@ CI/CD pipeline integration
 Danish Zulfiqar
 
 ----
-
-
-
-
-Python packag
-
